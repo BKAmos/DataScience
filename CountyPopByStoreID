@@ -1,0 +1,62 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Jan 29 17:09:27 2022
+
+@author: Kirtley
+"""
+
+### The purpose of this script is to search data based on store ID and then return the population informaiton of the past x years that are provided
+
+### import modules
+import pandas as pd
+import seaborn as sns
+
+
+### Read files
+df1 = pd.read_csv(r"C:\\Users\Kirtley\Desktop\Karl_Stuff\Karl_Stuff\workingData\\CombinedData\combinedData_allColumns.csv")
+
+
+df11 = df1.rename(columns={'Store No.': 'StoreNumber'})
+df2 = pd.read_csv(r'C:\\Users\Kirtley\Desktop\Karl_Stuff\Karl_Stuff\workingData\CensusData\CC-EST2020-ALLDATA.csv')
+
+df3 = pd.read_csv(r'C:\\Users\Kirtley\Desktop\Karl_Stuff\Karl_Stuff\workingData\CensusData\StateIDKey.csv')
+
+### Search by store ID
+storeID = 7659
+for i in range(0, len(df11.StoreNumber)):
+    if df11.StoreNumber[i] == str(storeID):
+        if df11.Name[i].startswith('Dollar General'):
+            county = df1.County[i]
+            state = df1.State[i]
+
+
+### Get the state name
+for i in range(0, len(df3.Code)):
+    if df3.Code[i] == state:
+        fullStateName = df3.State[i]
+        
+totalPop = []
+year = []
+
+
+### Search for the county and state and get the total population by year 
+for i in range(0, len(df2.SUMLEV)):
+    if df2.CTYNAME[i].startswith(county):
+        if df2.AGEGRP[i] == 0:
+            if df2.STNAME[i] == fullStateName:
+                
+                Totpop = df2.TOT_POP[i]
+                year1 = df2.YEAR[i]
+                
+                totalPop.append(Totpop)
+                year.append(year1)
+                
+data_tuple = list(zip(year,totalPop))
+
+
+### Create the pandas dataframe that will be used to create the plot of population over time.
+df2image = pd.DataFrame(data_tuple, columns=['Year','TotalPopulation'])
+
+print(df2image)
+sns.set_theme(style='ticks')
+sns.lmplot(x = 'Year', y = 'TotalPopulation', data=df2image)
