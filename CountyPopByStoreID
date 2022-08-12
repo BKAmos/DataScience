@@ -13,13 +13,13 @@ import seaborn as sns
 
 
 ### Read files
-df1 = pd.read_csv(r"C:\\Users\Kirtley\Desktop\Karl_Stuff\Karl_Stuff\workingData\\CombinedData\combinedData_allColumns.csv")
+df1 = pd.read_csv(r"combinedData_allColumns.csv")
 
 
 df11 = df1.rename(columns={'Store No.': 'StoreNumber'})
-df2 = pd.read_csv(r'C:\\Users\Kirtley\Desktop\Karl_Stuff\Karl_Stuff\workingData\CensusData\CC-EST2020-ALLDATA.csv')
+df2 = pd.read_csv(r'CC-EST2020-ALLDATA.csv')
 
-df3 = pd.read_csv(r'C:\\Users\Kirtley\Desktop\Karl_Stuff\Karl_Stuff\workingData\CensusData\StateIDKey.csv')
+df3 = pd.read_csv(r'StateIDKey.csv')
 
 ### Search by store ID
 storeID = 7659
