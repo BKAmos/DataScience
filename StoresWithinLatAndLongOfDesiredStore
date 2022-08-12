@@ -1,0 +1,151 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Mar 16 19:58:30 2021
+
+@author: Kirtley
+
+### The purpose of this script is to search by StoreId and then look up stores that are within a certain latitude and longitude of the desired store
+"""
+
+import pandas as pd
+import math
+
+###### Import files
+dollar_general = pd.read_csv('C:/Users/Kirtley/Desktop/Karl_Stuff/Karl_Stuff/sampleData/Dollar_General_USA.csv')
+combinedData = pd.read_csv('C:/Users/Kirtley/Desktop/Karl_Stuff/Karl_Stuff/workingData/combinedData_first5Columns_StoreNameModification.csv')
+
+### Searches for the latitude and longitude of the store of interest and resturns that infomraiton in the form of a list
+def searchForDGStoreID(dgDataFrame, storeIDOfInterest):
+
+    stores = []
+    name = []
+    lat = []
+    long = []
+    address = []
+    
+    for i in range(0, len(dollar_general.StoreId)):
+        
+        if dollar_general.StoreId[i] == storeIDOfInterest:
+            
+            y = dollar_general.StoreId[i]
+            n = dollar_general.Name[i]
+            k = dollar_general.Latitude[i]
+            q = dollar_general.Longitude[i]
+            a = dollar_general.Address[i]
+            
+            stores.append(y)
+            name.append(n)
+            lat.append(k)
+            long.append(q)
+            address.append(a)
+            
+    return stores, name, lat, long, address
+###########
+
+
+######### Sorts through the dataframes based on the desired lat and long filters and returns the corresponding store ID, lat, long, and addres
+def filterCloseStores(DGLat, DGLong, searchStoreDF):
+    
+    s1 = []
+    name = []
+    lat1 = [] 
+    long1 = []
+    address = []
+    
+    for i in range(0, len(DGLat)):
+        
+        for j in range(0, len(searchStoreDF.iloc[:,0])):
+            
+            if searchStoreDF.Latitude[j] - .5 <= DGLat[i] <= searchStoreDF.Latitude[j] + .5:
+               
+                if searchStoreDF.Longitude[j] - .5 <= DGLong[i] <= searchStoreDF.Longitude[j] + .5:
+                
+                    r = searchStoreDF.iloc[:,0][j]
+                    n = searchStoreDF.Name[j]
+                    q = searchStoreDF.Latitude[j]
+                    m = searchStoreDF.Longitude[j]
+                    a = searchStoreDF.Address[j]
+        
+                    s1.append(r)
+                    name.append(n)
+                    lat1.append(q)
+                    long1.append(m)
+                    address.append(a)
+                    
+    return s1, name, lat1, long1, address
+###########
+
+
+####### measures distance as measured by a hypotenuse between stores that meet threshold and DG of interest
+def measureDistance(DGLat, DGLong, StoreLat, StoreLong, StoreAddress):
+    
+    storedistance = []
+    Addresses = []
+    
+    for i in range(0, len(DGLat)):
+        for j in range(0, len(StoreLat)):
+            
+            latdiff = DGLat[i] - StoreLat[j]
+            longdiff = DGLong[i] - StoreLong[j]
+            hypotenuse = math.sqrt(latdiff ** 2 + longdiff ** 2)
+            
+            # if hypotenuse != 0:    
+                
+            Addresses.append(StoreAddress[j])
+            storedistance.append(hypotenuse)
+                
+    return storedistance, Addresses
+############
+
+
+####### Sorts the distance measured from closest to furthest ###### this needs to be alist of all stores and then there also needs ot be threshold, so the top 200 stores.
+def sortsDistance(storeDist, address):
+    
+    zipped_lists = zip(storeDist, address)
+    sorted_pairs = sorted(zipped_lists)
+
+    tuples = zip(*sorted_pairs)
+    distance, storeAddress = [list(tuple) for tuple in tuples]
+    
+    closest200Addresses = storeAddress[:200]
+    closest200Distances = distance[:200]
+    
+    return closest200Addresses, closest200Distances
+########
+
+
+###### Creates the dataframe that is to be printed
+def createsDataFrameToPrint(sortedCloseStoreAddresses, allStoresInRange, allNamesInRange, allLatsInRange, allLongInRange, allAddressInRange):
+    
+    closeststores = []
+    closestNames = []
+    closestLats = []
+    closestLongs = []
+    closestAddress = []
+    
+    for i in sortedCloseStoreAddresses:
+        # print(i)
+        for j in range(0, len(allStoresInRange)):
+            # print(j)
+            if i == allAddressInRange[j]:
+                
+                closeststores.append(allStoresInRange[j])
+                closestNames.append(allNamesInRange[j])
+                closestLats.append(allLatsInRange[j])
+                closestLongs.append(allLongInRange[j])
+                closestAddress.append(allAddressInRange[j])
+                
+    dfToPrint = pd.DataFrame(list(zip(closeststores, closestNames, closestLats, closestLongs, closestAddress)), columns = ['StoreID', 'Names', 'Lat', 'Long', 'Address'])
+    dfNoDuplicates = dfToPrint.drop_duplicates()
+    dfNoDuplicates.to_csv('C:/Users/Kirtley/Desktop/Karl_Stuff/Karl_Stuff/OutputFiles/DG_469_closest200.txt', sep = '\t', index = False)
+#################
+
+def main():
+    
+    stores, name, lat, long, address = searchForDGStoreID(dollar_general, 469)
+    AllStores, AllNames, Alllat, Alllong, Alladdress = filterCloseStores(lat, long, combinedData)
+    distance, closeStoreAddress = measureDistance(lat, long, Alllat, Alllong, Alladdress)
+    sortedCloseStoreAddress, sortedDistance = sortsDistance(distance, closeStoreAddress)
+    createsDataFrameToPrint(sortedCloseStoreAddress, AllStores, AllNames, Alllat, Alllong, Alladdress)
+    
+main()
