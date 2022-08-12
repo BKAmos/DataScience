@@ -11,8 +11,8 @@ import pandas as pd
 import math
 
 ###### Import files
-dollar_general = pd.read_csv('C:/Users/Kirtley/Desktop/Karl_Stuff/Karl_Stuff/sampleData/Dollar_General_USA.csv')
-combinedData = pd.read_csv('C:/Users/Kirtley/Desktop/Karl_Stuff/Karl_Stuff/workingData/combinedData_first5Columns_StoreNameModification.csv')
+dollar_general = pd.read_csv('Dollar_General_USA.csv')
+combinedData = pd.read_csv('combinedData_first5Columns_StoreNameModification.csv')
 
 ### Searches for the latitude and longitude of the store of interest and resturns that infomraiton in the form of a list
 def searchForDGStoreID(dgDataFrame, storeIDOfInterest):
@@ -137,7 +137,7 @@ def createsDataFrameToPrint(sortedCloseStoreAddresses, allStoresInRange, allName
                 
     dfToPrint = pd.DataFrame(list(zip(closeststores, closestNames, closestLats, closestLongs, closestAddress)), columns = ['StoreID', 'Names', 'Lat', 'Long', 'Address'])
     dfNoDuplicates = dfToPrint.drop_duplicates()
-    dfNoDuplicates.to_csv('C:/Users/Kirtley/Desktop/Karl_Stuff/Karl_Stuff/OutputFiles/DG_469_closest200.txt', sep = '\t', index = False)
+    dfNoDuplicates.to_csv('DG_469_closest200.txt', sep = '\t', index = False)
 #################
 
 def main():
